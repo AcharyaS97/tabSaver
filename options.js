@@ -49,11 +49,14 @@ function loadUserGroups(groupName,storageData)
 
     for (tabs of storageData[groupName])
     {
-        let listItem = $('<li class="list-group-item">');
-        let listLink = $('<a>')
-        listLink.append(tabs.url);
-        listItem.append(listLink);
-        listOverall.append(listItem);
+        if (tabs != null)
+        {
+            let listItem = $('<li class="list-group-item">');
+            let listLink = $('<a>')
+            listLink.append(tabs.url);
+            listItem.append(listLink);
+            listOverall.append(listItem);
+        }
     }
 
     return listOverall;
@@ -72,31 +75,34 @@ $(document).ready(function(){
         chrome.storage.sync.get(null,function(data){
             let keys = Object.keys(data); 
             for (key of keys){
-                let listItem = $('<li class="list-group-item hvr-icon-hang">');
-                let badgeSpan = $('<span class="badge badge-pill badge-primary">');
-                let a = $('<span class="hvr-icon-hang">');
-                  
-                let icon = $('<i class="fas fa-chevron-down hvr-icon"></i>');  
+                if (key != null)
+                {
+                    let listItem = $('<li class="list-group-item hvr-icon-hang">');
+                    let badgeSpan = $('<span class="badge badge-pill badge-primary">');
+                    let a = $('<span class="hvr-icon-hang">');
+                    
+                    let icon = $('<i class="fas fa-chevron-down hvr-icon"></i>');  
 
-                icon.click(function(){
-                    icon.parent().siblings(':last').slideToggle();
-                });
+                    icon.click(function(){
+                        icon.parent().siblings(':last').slideToggle();
+                    });
 
-                a.append(icon);
+                    a.append(icon);
 
-                if (!recoveredKeys.includes(key)){
-                    recoveredKeys.push(key);
-                    badgeSpan.append(data[key].length);
+                    if (!recoveredKeys.includes(key)){
+                        recoveredKeys.push(key);
+                        badgeSpan.append(data[key].length);
 
-                    listItem.append(key);
-                    listItem.append("        ");
-                    listItem.append(badgeSpan);
-                    listItem.append(a);
+                        listItem.append(key);
+                        listItem.append("        ");
+                        listItem.append(badgeSpan);
+                        listItem.append(a);
 
-                    let listContents = loadUserGroups(key,data);
-                    listItem.append(listContents);
-                    $("#savedTabList").append(listItem);
+                        let listContents = loadUserGroups(key,data);
+                        listItem.append(listContents);
+                        $("#savedTabList").append(listItem);
 
+                    }
                 }
             }
         })
@@ -132,18 +138,49 @@ $(document).ready(function(){
     
 
     $('#selectAllCheckBox').change(function(){
+        var cTabs = currentTabs;
+        console.log(currentTabs.length + " " + cTabs.length);
         var listOfRows = $("#tableBody").children();
         var listOfTrs = $.makeArray(listOfRows);
-
         if(this.checked){ 
             //console.log(listOfTrs);
+
+            for (rows of listOfRows){
+                let p = rows.firstElementChild.firstElementChild;
+                let insertIndex = parseInt(p.innerText);
+                let checkBox = rows.firstElementChild.lastElementChild;
+                checkBox.checked = true;
+
+                if (selectedTabs.length == 0)
+                {
+                    selectedTabs.push(currentTabs[insertIndex]);
+                    continue;
+                }
+
+                // return false;
+
+                for (let i = 0 ; i < selectedTabs.length ; i++){
+                   if (selectedTabs[i].id == currentTabs[insertIndex].id)
+                   {
+                       break;
+                   }
+
+                   else if (i + 1 == selectedTabs.length)
+                   {
+                       selectedTabs.push(currentTabs[insertIndex]);
+                   }
+                }
+            }
+            console.log(selectedTabs);
+            return false;
             for (var i = 0 ; i < listOfTrs.length ;i++)
             {
                var check =  listOfTrs[i].firstElementChild.lastElementChild;
-              // var insertionIndex =listOfTrs[i].firstElementChild.firstElementChild.value
                check.checked= true;
-               if (selectedTabs.indexOf(currentTabs[insertionIndex]) < 0)
+               if (!selectedTabs.includes(currentTabs[i]))
                {
+                   console.log(i);
+                   console.log(selectedTabs);
                    selectedTabs.push(currentTabs[i]);
                }
                
@@ -154,22 +191,23 @@ $(document).ready(function(){
             for (var i = 0 ; i < listOfTrs.length ; i++)
             {
                var check =  listOfTrs[i].firstElementChild.lastElementChild;
-               var insertionIndex =listOfTrs[i].firstElementChild.firstElementChild.value; 
                check.checked= false;
-               selectedTabs.splice(selectedTabs.indexOf(currentTabs[insertionTabIndex]),1);
+               selectedTabs.splice(selectedTabs.indexOf(currentTabs[i]),1);
             }
         }
         console.log(selectedTabs);
     });
-        //$(this).addClass("active");
         //Query chrome tabs api for all tabs in the current window and output to options list
-        chrome.tabs.query({currentWindow:true},function(currentTabs){
+        chrome.tabs.query({currentWindow:true},function(data){
+        currentTabs = data;
+        console.log(currentTabs);
+        console.log(currentTabs[0]);
         var titleArray=[];
        // let checkBoxTd = '<td><input class="listCheckBoxes" type = "checkbox"></input></td>';
         for (var i = 0 ; i < currentTabs.length  ; i++)
         {
             let title = currentTabs[i].title;
-            if (currentTabs[i].active != true)
+            if (currentTabs[i].selected == false)
             {
                 let checkBoxTd = $('<td>');
 
@@ -181,7 +219,7 @@ $(document).ready(function(){
                     innerText:title
                 });
                 
-                let checkIndex = $('<p hidden>');
+                let checkIndex = $('<p hidden = "true">');
                 checkIndex.append(i);
 
                 checkBox.change(function(){
@@ -198,7 +236,7 @@ $(document).ready(function(){
                 let tabURL = currentTabs[i].url;
                 let pageURL = getURL(tabURL);
 
-                currentTabs.push(pageURL);  
+             //   currentTabs.push(pageURL);  
 
                 let labelURL = $('<label>',{
                     innerText : pageURL
