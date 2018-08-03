@@ -1,8 +1,8 @@
 var currentTabs=[];
 var selectedTabs=[];
-
+var currentWindowId;
 var recoveredKeys=[];
-
+var retrievedStorageData={};
 function getURL (tabURL){
 
     if (tabURL.startsWith("chrome-extension"))
@@ -51,7 +51,25 @@ function loadUserGroups(groupName,storageData)
     {
         if (tabs != null)
         {
+ 
             let listItem = $('<li class="list-group-item">');
+            let color = listItem.children(':last').css('color');
+            let currentURL 
+            listItem.on("mouseover",function(){
+                $(this).children(':last').css("color","red");
+            });
+            listItem.on("mouseout",function(){
+                $(this).children(':last').css("color","black");
+            })
+            listItem.click(function(){  
+                console.log("hii");
+                let currentURL = $(this).children(':first')[0].innerText;
+                console.log(currentURL);
+                chrome.tabs.create({url:currentURL},function(t){
+                    console.log(t);
+                })
+            })
+
             let listLink = $('<a>')
             listLink.append(tabs.url);
             listItem.append(listLink);
@@ -62,8 +80,11 @@ function loadUserGroups(groupName,storageData)
     return listOverall;
 }
 
-
 $(document).ready(function(){
+
+    chrome.windows.getCurrent(function(data){
+        currentWindowId = data.id;
+    })
 
     //To load window showing saved tab groups
     $("#savedGroupTab").click(function(){
@@ -73,31 +94,80 @@ $(document).ready(function(){
 
         //Get all of the keys and values
         chrome.storage.sync.get(null,function(data){
+            retrievedStorageData = data;
             let keys = Object.keys(data); 
             for (key of keys){
                 if (key != null)
                 {
                     let listItem = $('<li class="list-group-item hvr-icon-hang">');
                     let badgeSpan = $('<span class="badge badge-pill badge-primary">');
-                    let a = $('<span class="hvr-icon-hang">');
-                    
-                    let icon = $('<i class="fas fa-chevron-down hvr-icon"></i>');  
+                    let a = $('<span class="hvr-icon-hang float-center">');
+                    let headerSpan = $('<span class="float-left">');
+                    let restoreSpan = $('<span class="float-right">');
 
+                    let btnRestoreAll = $('<button class="btn btn-light float-right">Restore All In Group</button>');
+                    //let newWindowCheckBox = $('<input class="float-right" id="newWindow">');
+                    let newWindowCheckBox =$('<input>',{
+                        type:"checkbox",
+                        class:"float-right",
+                        id:"newWindow"
+                    })
+
+                    // let newWind = newWindowCheckBox.change(function(){
+                    //     if (this.checked){
+                    //         return 0;
+                    //     }
+                    //     else{
+                    //         return 1;
+                    //     }
+                    //     }); 
+                    btnRestoreAll.click(function(){
+                        let urls = []
+                        let liOverall = $(this).siblings(':first')[0];
+                        let groupName = liOverall.innerText;
+                        let tabList = retrievedStorageData[groupName];
+                        for (tabs of tabList){
+                            urls.push(tabs.url);
+                        }
+                        console.log(tabList);
+                        newWind = $("#newWindow").is(':checked');
+                        //Get the list of urls for the current group
+                       // let newWind = $('#newWindow').attr('checked')?true:false;
+                        console.log(newWind);
+                        if (newWind === true)
+                        {
+                            console.log("Hii");
+                            chrome.windows.create({url:urls})
+                        }
+
+                        else if (newWind == false){
+                            for (let i = 0 ; i < urls.length ; i++)
+                            {
+                                chrome.tabs.create({url:urls[i]})
+                            }
+                        }
+                    })
+
+                    let icon = $('<i class="fas fa-chevron-down hvr-icon"></i>');  
+                    
                     icon.click(function(){
                         icon.parent().siblings(':last').slideToggle();
                     });
 
+                    restoreSpan.append(btnRestoreAll);
+                    restoreSpan.append(newWindowCheckBox)
                     a.append(icon);
 
                     if (!recoveredKeys.includes(key)){
                         recoveredKeys.push(key);
                         badgeSpan.append(data[key].length);
-
-                        listItem.append(key);
-                        listItem.append("        ");
+                        headerSpan.append(key);
+                        listItem.append(headerSpan);
                         listItem.append(badgeSpan);
                         listItem.append(a);
-
+                        listItem.append(restoreSpan);
+                        listItem.append(btnRestoreAll);
+                        listItem.append(newWindowCheckBox);
                         let listContents = loadUserGroups(key,data);
                         listItem.append(listContents);
                         $("#savedTabList").append(listItem);
@@ -134,12 +204,9 @@ $(document).ready(function(){
     
         return true;
     })
-    
-    
 
     $('#selectAllCheckBox').change(function(){
         var cTabs = currentTabs;
-        console.log(currentTabs.length + " " + cTabs.length);
         var listOfRows = $("#tableBody").children();
         var listOfTrs = $.makeArray(listOfRows);
         if(this.checked){ 
