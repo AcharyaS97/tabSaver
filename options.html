@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link href="assets/all.css" rel="stylesheet">
+    <link href="assets/hover-min.css" rel="stylesheet">
+    <style type="text/css">
+
+      body {background: #2E5A69 !important;}
+      .text-primary{color:#F7F7F7 !important;}
+      .tabList{background :#F7FAFB !important;}
+      .nav-tabs>.active>a, .nav-tabs>.active>a:hover, .nav-tabs>.active>a:focus {
+            border-color: #8a644b;
+            border-bottom-color: transparent;
+      }
+      .nav-tabs{
+       border-bottom: 1px solid #d45500;
+      }
+      .listTop{
+          background-color: #99B2DD !important;
+      }
+      .ul{
+          list-style-type: none;
+      }
+      .tableGroup{
+          background-color:#eceddc;
+      }
+      .internalList{
+          height:100px;
+          overflow-y:scroll;
+      }
+
+      #selectAll{
+          width : 1%;
+      }
+      #linkName{
+          width : 13%;
+      }
+      #linkURL{
+          width : 86%;
+      }
+      #savedGroupTab{
+          padding-left: 30px;
+      }
+      #addButton{
+          margin-right: 100px;
+      }
+      i{
+          padding-left: 20px;
+      }
+      #optionsTitle{
+          width:50%;
+      }
+    </style>
+    <title>TabSaver Options</title>
+  </head>
+  <body class="main">
+
+      <div class="d-flex flex-row" id="optionsTitle">
+      <h1 class="text-primary">Save Tab</h1>
+      </div>
+
+      <ul class="nav nav-tabs tabList">
+        <li class="active"><a data-toggle="tab" href="#openTabs">Open Tabs</a></li>
+        <li> <a id="savedGroupTab" data-toggle="tab" href="#savedGroups">Saved Groups</a></li>
+      </ul>
+
+      <!-- Display Area -->
+      <div class = "tab-content">
+
+
+        <div id="openTabs" class = "tab-pane fade in active container-flow">
+            
+            <!-- Link Table -->
+            <table id="myTable" class ="table tableGroup">
+                <thead class="tableGroup">
+                    <tr>
+                        <th id="selectAllCell" class="linkSelector" ><input id="selectAllCheckBox" type="checkbox"></input></th>
+                        <th id="linkName">Page Name</th>
+                        <th id="linkURL">Page URL</th>
+                        <th id="addButton"><span class="container-flow"><button class= "btn btn-info" id="addGroup">Add new group</button></span></th>
+                    </tr>
+                </thead>
+
+                <tbody id="tableBody" class="tableGroup">
+                    
+                </tbody>
+            </table>
+
+            <div class="modal" tabindex="-1" role="dialog" id="addGroupModal">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">Add new tab group</h2>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <label for="groupNameTextBox">Group Name</label>  
+                              <input type="text" id="groupNameTextBox">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="submitGroup" class="btn btn-success">Add group</button>
+                            </div>
+                        </div>
+                    </div>
+              </div>
+            
+            <!--                                                                  -->
+          </div>
+          <div id="savedGroups" class = "tab-pane fade">
+              <ul id="savedTabList" class="list-group">
+
+              </ul>
+          </div>
+
+          
+
+
+
+      </div>
+
+      
+      <script src ="jquery.min.js"></script>
+      <script src ="popper.min.js"></script>
+      <script src ="bootstrap.min.js"></script>
+      <script src ="/assets/all.js" data-auto-replace-svg="nest"></script>
+      <script src ="options.js"></script>
+
+  </body>
+</html>
