@@ -70,7 +70,10 @@ function loadUserGroups(groupName,storageData)
                 })
             })
 
-            let listLink = $('<a>')
+            let listLink = $('<a>',{
+                href:tabs.url,
+                target:"_blank"
+            })
             listLink.append(tabs.url);
             listItem.append(listLink);
             listOverall.append(listItem);
@@ -113,14 +116,6 @@ $(document).ready(function(){
                         id:"newWindow"
                     })
 
-                    // let newWind = newWindowCheckBox.change(function(){
-                    //     if (this.checked){
-                    //         return 0;
-                    //     }
-                    //     else{
-                    //         return 1;
-                    //     }
-                    //     }); 
                     btnRestoreAll.click(function(){
                         let urls = []
                         let liOverall = $(this).siblings(':first')[0];
@@ -171,7 +166,6 @@ $(document).ready(function(){
                         let listContents = loadUserGroups(key,data);
                         listItem.append(listContents);
                         $("#savedTabList").append(listItem);
-
                     }
                 }
             }
